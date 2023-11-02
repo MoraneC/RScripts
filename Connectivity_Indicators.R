@@ -32,7 +32,7 @@ N_Link_func <- function(x,Sink_name,Time_name){
 
 Multi_link_rate <- function(x,Sink_name,Time_name){
      unique(x[,c('ID_Source',Sink_name,Time_name,'Link')]) %>% 
-          group_by(ID_Source,across(ID_Dest)) %>% 
+          group_by(ID_Source,across(Sink_name)) %>%
           summarise_at(vars(Link),list(link_per_year=sum)) %>%
           group_by(ID_Source) %>% 
           mutate(tot_link=sum(link_per_year)) %>%
@@ -92,7 +92,7 @@ Tot_Part <- function(x,Sink_name,Time_name){
 
 Frequency_info <- function(Table,Tot_time){
      Table[is.na(Table)] <- 0 # if NA are present in third to n-th column, put 0
-     Table[Table > 0] <- 1
+     Table[,c(-1,-2)][Table[,c(-1,-2)] > 0] <- 1
      if (ncol(unique(Table[,-c(1,2)])) != Tot_time){ # In case a Time has been simulated but no link has established, make that year accounted in the table
 
           missing_time <- which(1:Tot_time %nin% colnames(Table[,-c(1,2)])) # Find which time is missing in the table
@@ -108,7 +108,7 @@ Table_info <- Table[,1:2]
 Table_info$Freq <- 0;  Table_info$MaxConsecutive <- 0 ; Table_info$AvgConsecutive <- 0
 for (i in 1:dim(Table)[1]) {
      Length_Occ <- rle(as.vector(Table[i,-c(1,2)],mode='numeric'))
-     Info <- Length_Occ$lengths[Length_Occ$values==1]     
+     Info <- Length_Occ$lengths[Length_Occ$values==1]
      Table_info$Freq[i] <- sum(Info)
      Table_info$MaxConsecutive[i] <- max(Info)
      Table_info$AvgConsecutive[i] <- mean(Info)
